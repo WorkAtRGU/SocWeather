@@ -11,7 +11,7 @@
         android:id="@+id/tvConfirmLocationLabel"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_margin="8dp"
+        android:layout_margin="16dp"
         android:labelFor="@id/spConfirmLocation"
         android:text="@string/tvConfirmLocationLabel" />
 
@@ -19,7 +19,7 @@
         android:id="@+id/spConfirmLocation"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_margin="8dp"
+        android:layout_margin="16dp"
         android:minHeight="48dp" />
 
     <Button

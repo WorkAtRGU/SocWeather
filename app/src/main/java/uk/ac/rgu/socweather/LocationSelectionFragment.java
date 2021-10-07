@@ -12,10 +12,10 @@ import android.widget.Button;
 
 /**
  * A simple {@link Fragment} subclass.
- * Use the {@link LocationConfirmationFragment#newInstance} factory method to
+ * Use the {@link LocationSelectionFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class LocationConfirmationFragment extends Fragment implements View.OnClickListener {
+public class LocationSelectionFragment extends Fragment implements View.OnClickListener {
 
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -26,7 +26,7 @@ public class LocationConfirmationFragment extends Fragment implements View.OnCli
     private String mParam1;
     private String mParam2;
 
-    public LocationConfirmationFragment() {
+    public LocationSelectionFragment() {
         // Required empty public constructor
     }
 
@@ -36,11 +36,11 @@ public class LocationConfirmationFragment extends Fragment implements View.OnCli
      *
      * @param param1 Parameter 1.
      * @param param2 Parameter 2.
-     * @return A new instance of fragment LocationConfirmationFragment.
+     * @return A new instance of fragment LocationSelectionFragment.
      */
     // TODO: Rename and change types and number of parameters
-    public static LocationConfirmationFragment newInstance(String param1, String param2) {
-        LocationConfirmationFragment fragment = new LocationConfirmationFragment();
+    public static LocationSelectionFragment newInstance(String param1, String param2) {
+        LocationSelectionFragment fragment = new LocationSelectionFragment();
         Bundle args = new Bundle();
         args.putString(ARG_PARAM1, param1);
         args.putString(ARG_PARAM2, param2);
@@ -61,18 +61,22 @@ public class LocationConfirmationFragment extends Fragment implements View.OnCli
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        View view = inflater.inflate(R.layout.fragment_location_confirmation, container, false);
+        View view = inflater.inflate(R.layout.fragment_location_selection, container, false);
 
-        Button btnGetForecast = view.findViewById(R.id.btnGetForecastLocationConfirm);
+        Button btnGetForecast = view.findViewById(R.id.btnGetForecast);
         btnGetForecast.setOnClickListener(this);
+        Button btnGpsForecast = view.findViewById(R.id.btnGpsForecast);
+        btnGpsForecast.setOnClickListener(this);
 
         return view;
     }
 
     @Override
     public void onClick(View v) {
-        if (v.getId() == R.id.btnGetForecastLocationConfirm){
-            Navigation.findNavController(v).navigate(R.id.action_locationConfirmationFragment_to_forecastFragment);
+        if (v.getId() == R.id.btnGetForecast){
+            Navigation.findNavController(v).navigate(R.id.action_locationSelectionFragment_to_locationConfirmationFragment);
+        } else if (v.getId() == R.id.btnGpsForecast) {
+            Navigation.findNavController(v).navigate(R.id.action_locationSelectionFragment_to_forecastFragment);
         }
     }
 }
