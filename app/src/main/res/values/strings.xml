@@ -34,4 +34,12 @@
     <string name="miSettings">Settings</string>
     <string name="miLocationSelection">Home</string>
 
+
+    <!-- for randomly generating the weather -->
+    <!-- for the RandomWeatherForecastGetter -->
+    <string name="weather_sun">sunny</string>
+    <string name="weather_rain">rain</string>
+    <string name="weather_snow">snow</string>
+    <string name="weather_windy">windy</string>
+
 </resources>
