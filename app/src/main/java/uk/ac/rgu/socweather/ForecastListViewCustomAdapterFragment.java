@@ -2,21 +2,26 @@ package uk.ac.rgu.socweather;
 
 import android.os.Bundle;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
-import androidx.navigation.Navigation;
-
 
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
+import android.widget.ListView;
+
+import java.util.List;
+
+import uk.ac.rgu.socweather.data.ForecastRepository;
+import uk.ac.rgu.socweather.data.HourForecast;
 
 /**
  * A simple {@link Fragment} subclass.
- * Use the {@link LocationSelectionFragment#newInstance} factory method to
+ * Use the {@link ForecastListViewCustomAdapterFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class LocationSelectionFragment extends Fragment implements View.OnClickListener {
+public class ForecastListViewCustomAdapterFragment extends Fragment {
 
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -27,7 +32,7 @@ public class LocationSelectionFragment extends Fragment implements View.OnClickL
     private String mParam1;
     private String mParam2;
 
-    public LocationSelectionFragment() {
+    public ForecastListViewCustomAdapterFragment() {
         // Required empty public constructor
     }
 
@@ -37,11 +42,11 @@ public class LocationSelectionFragment extends Fragment implements View.OnClickL
      *
      * @param param1 Parameter 1.
      * @param param2 Parameter 2.
-     * @return A new instance of fragment LocationSelectionFragment.
+     * @return A new instance of fragment ForecastListViewCustomAdapter.
      */
     // TODO: Rename and change types and number of parameters
-    public static LocationSelectionFragment newInstance(String param1, String param2) {
-        LocationSelectionFragment fragment = new LocationSelectionFragment();
+    public static ForecastListViewCustomAdapterFragment newInstance(String param1, String param2) {
+        ForecastListViewCustomAdapterFragment fragment = new ForecastListViewCustomAdapterFragment();
         Bundle args = new Bundle();
         args.putString(ARG_PARAM1, param1);
         args.putString(ARG_PARAM2, param2);
@@ -62,22 +67,21 @@ public class LocationSelectionFragment extends Fragment implements View.OnClickL
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        View view = inflater.inflate(R.layout.fragment_location_selection, container, false);
-
-        Button btnGetForecast = view.findViewById(R.id.btnGetForecast);
-        btnGetForecast.setOnClickListener(this);
-        Button btnGpsForecast = view.findViewById(R.id.btnGpsForecast);
-        btnGpsForecast.setOnClickListener(this);
-
-        return view;
+        return inflater.inflate(R.layout.fragment_forecast_list_view_custom_adapter, container, false);
     }
 
     @Override
-    public void onClick(View v) {
-        if (v.getId() == R.id.btnGetForecast){
-            Navigation.findNavController(v).navigate(R.id.action_locationSelectionFragment_to_locationConfirmationFragment);
-        } else if (v.getId() == R.id.btnGpsForecast) {
-            Navigation.findNavController(v).navigate(R.id.action_locationSelectionFragment_to_forecastListViewCustomAdapterFragment);
-        }
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        // get the hour forecast
+        List<HourForecast> hourForecasts = ForecastRepository.getRepository(getContext()).getHourlyForecasts(3*24);
+        // create my custom adapter
+        HourForecastListItemViewAdapter adapter = new HourForecastListItemViewAdapter(getContext(), R.layout.hour_forecast_list_item,hourForecasts);
+
+        // get the ListView from view
+        ListView lvForecast = view.findViewById(R.id.lv_forecast_custom_adapter);
+
+        // wire up the ListView with the custom adapter
+        lvForecast.setAdapter(adapter);
     }
 }

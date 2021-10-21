@@ -43,6 +43,11 @@
     <string name="weather_windy">windy</string>
 
     <!-- for the ListView of Strings showing hourly forecast-->
-    <string name="forecasts_hour_str">On %1$s at %2$d it will be %3$d C and %4$d%% humidity.</string>
+    <string name="forecasts_hour_str">On %1$s at %2$d it will be %3$d \u00B0C and %4$d%% humidity.</string>
+
+    <!-- for the ListView of Custom Adapter for hourly forecast -->
+    <string name="tv_forecastItemTemp">%1$d\u00B0C</string>
+    <string name="tv_forecastItemHumidity">%1$d %%  </string>
+    <string name="tv_forecastItemHour">%1$d:00</string>
 
 </resources>

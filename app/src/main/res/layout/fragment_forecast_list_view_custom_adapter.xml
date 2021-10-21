@@ -4,11 +4,11 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".ForecastListViewString">
+    tools:context=".ForecastListViewCustomAdapterFragment">
 
 
     <TextView
-        android:id="@+id/tvForecastLabelListStr"
+        android:id="@+id/tvForecastLabelListCustomAdapter"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
@@ -21,43 +21,42 @@
         tools:text="Forecast for Aberdeen, UK" />
 
     <Button
-        android:id="@+id/btnShowLocationMapForecastListStr"
+        android:id="@+id/btnShowLocationMapForecastListCustomAdapter"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="8dp"
         android:text="@string/btnShowLocationMap"
-        app:layout_constraintBottom_toTopOf="@+id/btnCheckForecastOnlineForecastListStr"
-        tools:layout_editor_absoluteX="8dp" />
+        app:layout_constraintBottom_toTopOf="@+id/btnCheckForecastOnlineForecastListCustomAdapter"
+        app:layout_constraintStart_toStartOf="@+id/lv_forecast_custom_adapter" />
 
     <Button
-        android:id="@+id/btnCheckForecastOnlineForecastListStr"
+        android:id="@+id/btnCheckForecastOnlineForecastListCustomAdapter"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginBottom="8dp"
         android:text="@string/btnCheckForecastOnline"
-        app:layout_constraintBottom_toTopOf="@+id/btnShareForecastForecastListStr"
-        app:layout_constraintStart_toStartOf="@+id/btnShowLocationMapForecastListStr" />
+        app:layout_constraintBottom_toTopOf="@+id/btnShareForecastForecastListCustomAdapter"
+        app:layout_constraintStart_toStartOf="@+id/btnShowLocationMapForecastListCustomAdapter" />
 
     <Button
-        android:id="@+id/btnShareForecastForecastListStr"
+        android:id="@+id/btnShareForecastForecastListCustomAdapter"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginBottom="8dp"
         android:text="@string/btnShareForecast"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="@+id/btnCheckForecastOnlineForecastListStr" />
+        app:layout_constraintStart_toStartOf="@+id/btnCheckForecastOnlineForecastListCustomAdapter" />
 
     <ListView
-        android:id="@+id/lv_forecast_str"
+        android:id="@+id/lv_forecast_custom_adapter"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:layout_marginStart="8dp"
         android:layout_marginTop="8dp"
         android:layout_marginEnd="8dp"
         android:layout_marginBottom="8dp"
-        app:layout_constraintBottom_toTopOf="@+id/btnShowLocationMapForecastListStr"
+        app:layout_constraintBottom_toTopOf="@+id/btnShowLocationMapForecastListCustomAdapter"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/tvForecastLabel" />
+        app:layout_constraintTop_toBottomOf="@+id/tvForecastLabelListCustomAdapter" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
