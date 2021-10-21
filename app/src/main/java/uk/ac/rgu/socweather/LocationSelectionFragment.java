@@ -77,7 +77,7 @@ public class LocationSelectionFragment extends Fragment implements View.OnClickL
         if (v.getId() == R.id.btnGetForecast){
             Navigation.findNavController(v).navigate(R.id.action_locationSelectionFragment_to_locationConfirmationFragment);
         } else if (v.getId() == R.id.btnGpsForecast) {
-            Navigation.findNavController(v).navigate(R.id.action_locationSelectionFragment_to_forecastFragment);
+            Navigation.findNavController(v).navigate(R.id.action_locationSelectionFragment_to_forecastListViewString);
         }
     }
 }

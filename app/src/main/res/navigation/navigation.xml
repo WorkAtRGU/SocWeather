@@ -16,6 +16,9 @@
         <action
             android:id="@+id/action_locationSelectionFragment_to_forecastFragment"
             app:destination="@id/forecastFragment" />
+        <action
+            android:id="@+id/action_locationSelectionFragment_to_forecastListViewString"
+            app:destination="@id/forecastListViewString" />
     </fragment>
     <fragment
         android:id="@+id/locationConfirmationFragment"
@@ -36,4 +39,9 @@
         android:name="uk.ac.rgu.socweather.SettingsFragment"
         android:label="fragment_settings"
         tools:layout="@layout/fragment_settings" />
+    <fragment
+        android:id="@+id/forecastListViewString"
+        android:name="uk.ac.rgu.socweather.ForecastListViewString"
+        android:label="fragment_forecast_list_view_string"
+        tools:layout="@layout/fragment_forecast_list_view_string" />
 </navigation>
