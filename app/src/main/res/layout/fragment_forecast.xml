@@ -2,7 +2,6 @@
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/frameLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".ForecastFragment">
@@ -22,7 +21,7 @@
         tools:text="Forecast for Aberdeen, UK" />
 
     <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/recyclerView"
+        android:id="@+id/rv_forecast"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:layout_marginStart="8dp"
@@ -41,7 +40,7 @@
         android:layout_marginBottom="8dp"
         android:text="@string/btnShowLocationMap"
         app:layout_constraintBottom_toTopOf="@+id/btnCheckForecastOnline"
-        app:layout_constraintStart_toStartOf="@+id/recyclerView" />
+        app:layout_constraintStart_toStartOf="@+id/rv_forecast" />
 
     <Button
         android:id="@+id/btnCheckForecastOnline"
