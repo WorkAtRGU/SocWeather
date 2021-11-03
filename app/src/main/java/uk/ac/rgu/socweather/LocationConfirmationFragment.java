@@ -17,14 +17,14 @@ import android.widget.Button;
  */
 public class LocationConfirmationFragment extends Fragment implements View.OnClickListener {
 
-    // TODO: Rename parameter arguments, choose names that match
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
 
-    // TODO: Rename and change types of parameters
-    private String mParam1;
-    private String mParam2;
+    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
+    public static final String ARG_LOCATION_NAME = "locationName";
+    public static final String ARG_NUM_DAYS = "numberOfDays";
+
+
+    private String mLocationName;
+    private int mNumDays;
 
     public LocationConfirmationFragment() {
         // Required empty public constructor
@@ -34,16 +34,15 @@ public class LocationConfirmationFragment extends Fragment implements View.OnCli
      * Use this factory method to create a new instance of
      * this fragment using the provided parameters.
      *
-     * @param param1 Parameter 1.
-     * @param param2 Parameter 2.
+     * @param locationName The name of the location to display the forecast for.
+     * @param numDays The number of days to display the forecast for.
      * @return A new instance of fragment LocationConfirmationFragment.
      */
-    // TODO: Rename and change types and number of parameters
-    public static LocationConfirmationFragment newInstance(String param1, String param2) {
+    public static LocationConfirmationFragment newInstance(String locationName, int numDays) {
         LocationConfirmationFragment fragment = new LocationConfirmationFragment();
         Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
+        args.putString(ARG_LOCATION_NAME, locationName);
+        args.putInt(ARG_NUM_DAYS, numDays);
         fragment.setArguments(args);
         return fragment;
     }
@@ -52,8 +51,8 @@ public class LocationConfirmationFragment extends Fragment implements View.OnCli
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
+            mLocationName = getArguments().getString(ARG_LOCATION_NAME);
+            mNumDays = getArguments().getInt(ARG_NUM_DAYS);
         }
     }
 
@@ -72,7 +71,13 @@ public class LocationConfirmationFragment extends Fragment implements View.OnCli
     @Override
     public void onClick(View v) {
         if (v.getId() == R.id.btnGetForecastLocationConfirm){
-            Navigation.findNavController(v).navigate(R.id.action_locationConfirmationFragment_to_forecastFragment);
+            // create bundle for the arguments
+            Bundle args = new Bundle();
+            args.putString(ARG_LOCATION_NAME, mLocationName);
+            args.putInt(ARG_NUM_DAYS, mNumDays);
+
+            Navigation.findNavController(v).navigate(
+                    R.id.action_locationConfirmationFragment_to_forecastFragment, args);
         }
     }
 }

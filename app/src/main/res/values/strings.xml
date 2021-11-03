@@ -14,7 +14,7 @@
     <string name="btnGetForecastLocationConfirm">Get forecast</string>
 
     <!-- Forecast fragment -->
-    <string name="tvForecastLabel">Forecast for </string>
+    <string name="tvForecastLabel">Forecast for %1$s</string>
     <string name="btnShowLocationMap">Show on map</string>
     <string name="btnCheckForecastOnline">Check forecast online</string>
     <string name="btnShareForecast">Share forecast</string>

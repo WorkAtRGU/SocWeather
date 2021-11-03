@@ -10,6 +10,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.EditText;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -18,14 +19,7 @@ import android.widget.Button;
  */
 public class LocationSelectionFragment extends Fragment implements View.OnClickListener {
 
-    // TODO: Rename parameter arguments, choose names that match
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
 
-    // TODO: Rename and change types of parameters
-    private String mParam1;
-    private String mParam2;
 
     public LocationSelectionFragment() {
         // Required empty public constructor
@@ -35,16 +29,13 @@ public class LocationSelectionFragment extends Fragment implements View.OnClickL
      * Use this factory method to create a new instance of
      * this fragment using the provided parameters.
      *
-     * @param param1 Parameter 1.
-     * @param param2 Parameter 2.
-     * @return A new instance of fragment LocationSelectionFragment.
+      * @return A new instance of fragment LocationSelectionFragment.
      */
     // TODO: Rename and change types and number of parameters
-    public static LocationSelectionFragment newInstance(String param1, String param2) {
+    public static LocationSelectionFragment newInstance() {
         LocationSelectionFragment fragment = new LocationSelectionFragment();
         Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
+
         fragment.setArguments(args);
         return fragment;
     }
@@ -53,8 +44,7 @@ public class LocationSelectionFragment extends Fragment implements View.OnClickL
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
+
         }
     }
 
@@ -74,8 +64,23 @@ public class LocationSelectionFragment extends Fragment implements View.OnClickL
 
     @Override
     public void onClick(View v) {
+
+        // Get the number of days entered by the user
+        EditText etNumberOfDays = getView().findViewById(R.id.editTextNumber);
+        int numberOfDays = Integer.parseInt(etNumberOfDays.getText().toString());
+
         if (v.getId() == R.id.btnGetForecast){
-            Navigation.findNavController(v).navigate(R.id.action_locationSelectionFragment_to_locationConfirmationFragment);
+            // Get the location entered by the yser
+            EditText etLocation = getView().findViewById(R.id.etEnterLocation);
+            String location = etLocation.getText().toString();
+
+            // create bundle for the arguments
+            Bundle args = new Bundle();
+            args.putString("locationName", location);
+            args.putInt("numberOfDays", numberOfDays);
+
+            Navigation.findNavController(v).navigate(
+                    R.id.action_locationSelectionFragment_to_locationConfirmationFragment, args);
         } else if (v.getId() == R.id.btnGpsForecast) {
             Navigation.findNavController(v).navigate(R.id.action_locationSelectionFragment_to_forecastFragment);
         }

@@ -11,6 +11,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 
 import java.util.List;
 
@@ -24,14 +25,10 @@ import uk.ac.rgu.socweather.data.HourForecast;
  */
 public class ForecastFragment extends Fragment {
 
-    // TODO: Rename parameter arguments, choose names that match
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
 
-    // TODO: Rename and change types of parameters
-    private String mParam1;
-    private String mParam2;
+    // member variables for the setting up the display
+    private String mLocationName;
+    private int mNumDays;
 
     public ForecastFragment() {
         // Required empty public constructor
@@ -41,16 +38,15 @@ public class ForecastFragment extends Fragment {
      * Use this factory method to create a new instance of
      * this fragment using the provided parameters.
      *
-     * @param param1 Parameter 1.
-     * @param param2 Parameter 2.
+     * @param locationName The name of the location to display the forecast for.
+     * @param numDays The number of days to display the forecast for.
      * @return A new instance of fragment ForecastFragment.
      */
-    // TODO: Rename and change types and number of parameters
-    public static ForecastFragment newInstance(String param1, String param2) {
+    public static ForecastFragment newInstance(String locationName, int numDays) {
         ForecastFragment fragment = new ForecastFragment();
         Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
+        args.putString(LocationConfirmationFragment.ARG_LOCATION_NAME, locationName);
+        args.putInt(LocationConfirmationFragment.ARG_NUM_DAYS, numDays);
         fragment.setArguments(args);
         return fragment;
     }
@@ -59,8 +55,8 @@ public class ForecastFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
+            mLocationName = getArguments().getString(LocationConfirmationFragment.ARG_LOCATION_NAME);
+            mNumDays = getArguments().getInt(LocationConfirmationFragment.ARG_NUM_DAYS);
         }
     }
 
@@ -74,8 +70,14 @@ public class ForecastFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+
+        // update text in the forecast label
+        TextView tvForecastLabel = view.findViewById(R.id.tvForecastLabel);
+        String label = getContext().getString(R.string.tvForecastLabel, mLocationName);
+        tvForecastLabel.setText(label);
+
         // get the data to display
-        List<HourForecast> hourForecasts = ForecastRepository.getRepository(getContext()).getHourlyForecasts(3*24);
+        List<HourForecast> hourForecasts = ForecastRepository.getRepository(getContext()).getHourlyForecasts(mNumDays*24);
 
         // create the adapter for the RecyclerView
         HourForecastRecyclerViewAdapter adapter = new HourForecastRecyclerViewAdapter(getContext(), hourForecasts);

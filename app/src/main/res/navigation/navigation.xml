@@ -35,13 +35,13 @@
             android:id="@+id/action_locationConfirmationFragment_to_forecastListViewCustomAdapterFragment"
             app:destination="@id/forecastListViewCustomAdapterFragment" />
         <argument
-            android:name="location"
+            android:name="locationName"
             app:argType="string"
             app:nullable="true" />
         <argument
-            android:name="numOfDays"
+            android:name="numberOfDays"
             app:argType="integer"
-            android:defaultValue="3" />
+            android:defaultValue="5" />
     </fragment>
     <fragment
         android:id="@+id/forecastFragment"
@@ -49,11 +49,13 @@
         android:label="fragment_forecast"
         tools:layout="@layout/fragment_forecast" >
         <argument
-            android:name="location"
-            app:argType="string" />
+            android:name="locationName"
+            app:argType="string"
+            app:nullable="true" />
         <argument
-            android:name="numOfDays"
-            app:argType="integer" />
+            android:name="numberOfDays"
+            app:argType="integer"
+            android:defaultValue="5" />
     </fragment>
     <fragment
         android:id="@+id/settingsFragment"
