@@ -95,7 +95,9 @@ public class ForecastFragment extends Fragment implements View.OnClickListener {
         // add action listeners to the three buttons
         Button btnShowMap = view.findViewById(R.id.btnShowLocationMap);
         btnShowMap.setOnClickListener(this);
-        
+
+        Button btnOpenBrowswer = view.findViewById(R.id.btnCheckForecastOnline);
+        btnOpenBrowswer.setOnClickListener(this);
     }
 
     @Override
@@ -104,16 +106,43 @@ public class ForecastFragment extends Fragment implements View.OnClickListener {
             // launch the map app to show this location.
             Intent intent = new Intent(Intent.ACTION_VIEW);
             // create a URI for geo:0,0?q=mLocationName
-            Uri geoLocation = Uri.parse("geo:0,0");
-            // create a URI Builder and add the parameter
-            Uri.Builder uriBuilder = geoLocation.buildUpon();
-            uriBuilder.appendQueryParameter("q", mLocationName);
+
             // update the intent with the data (URI)
-            intent.setData(uriBuilder.build());
+            intent.setData(buildUri("geo:0,0", "q", mLocationName));
             // launch it
+//            if (intent.resolveActivity(getContext().getPackageManager()) != null) {
+                startActivity(intent);
+//            }
+        } else if (v.getId() == R.id.btnCheckForecastOnline){
+            Uri webpage = buildUri(
+                    "https://www.bing.com/search",
+                    "q",
+                    mLocationName + " weather");
+            Intent intent = new Intent(Intent.ACTION_VIEW, webpage);
 //            if (intent.resolveActivity(getContext().getPackageManager()) != null) {
                 startActivity(intent);
 //            }
         }
     }
+
+    /**
+     * Builds and returns a Uri based on the parameters
+     * @param base The base of the URI
+     * @param paramName The name of the single parameter that will be added to the URI
+     * @param paramValue The value of that parameter
+     * @return A URI of the form <base>?<paramName>:<paramValue>
+     */
+    @NonNull
+    private Uri buildUri
+    (String base, String paramName, String paramValue) {
+        Uri geoLocation = Uri.parse(base);
+        // create a URI Builder and add the parameter
+        Uri.Builder uriBuilder = geoLocation.buildUpon();
+        uriBuilder.appendQueryParameter(paramName, paramValue);
+        return uriBuilder.build();
+    }
+
+
+
+
 }
