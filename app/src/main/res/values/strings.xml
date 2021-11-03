@@ -52,5 +52,6 @@
     <string name="tv_forecastItemHour">%1$d:00</string>
 
     <string name="error_downloading_locations">Error getting locations from the WeatherAPI</string>
+    <string name="forecast_download_error">Error getting forecast from WeatherAPI</string>
 
 </resources>

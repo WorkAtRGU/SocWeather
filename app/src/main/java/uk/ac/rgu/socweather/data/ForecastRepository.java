@@ -21,7 +21,7 @@ public class ForecastRepository {
      * A field for how dates should be formatted before displaying to users
      * with the day of the month as a number, and the month as text
      */
-    private static final String DATE_FORMAT = "dd MMM";
+    public static final String DATE_FORMAT = "dd MMM";
 
     /**
      * The Singleton instance for this repository
