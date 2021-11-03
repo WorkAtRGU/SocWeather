@@ -1,5 +1,7 @@
 package uk.ac.rgu.socweather;
 
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -11,6 +13,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.TextView;
 
 import java.util.List;
@@ -23,7 +26,7 @@ import uk.ac.rgu.socweather.data.HourForecast;
  * Use the {@link ForecastFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class ForecastFragment extends Fragment {
+public class ForecastFragment extends Fragment implements View.OnClickListener {
 
 
     // member variables for the setting up the display
@@ -88,6 +91,29 @@ public class ForecastFragment extends Fragment {
         // wireup the RecyclerView with the adapter
         rvForecast.setLayoutManager(new LinearLayoutManager(getContext()));
         rvForecast.setAdapter(adapter);
+
+        // add action listeners to the three buttons
+        Button btnShowMap = view.findViewById(R.id.btnShowLocationMap);
+        btnShowMap.setOnClickListener(this);
         
+    }
+
+    @Override
+    public void onClick(View v) {
+        if (v.getId() == R.id.btnShowLocationMap){
+            // launch the map app to show this location.
+            Intent intent = new Intent(Intent.ACTION_VIEW);
+            // create a URI for geo:0,0?q=mLocationName
+            Uri geoLocation = Uri.parse("geo:0,0");
+            // create a URI Builder and add the parameter
+            Uri.Builder uriBuilder = geoLocation.buildUpon();
+            uriBuilder.appendQueryParameter("q", mLocationName);
+            // update the intent with the data (URI)
+            intent.setData(uriBuilder.build());
+            // launch it
+//            if (intent.resolveActivity(getContext().getPackageManager()) != null) {
+                startActivity(intent);
+//            }
+        }
     }
 }
