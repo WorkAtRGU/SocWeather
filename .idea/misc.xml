@@ -6,7 +6,9 @@
         <entry key="..\:/git/SocWeather/app/src/main/res/layout/fragment_forecast.xml" value="0.25" />
         <entry key="..\:/git/SocWeather/app/src/main/res/layout/fragment_forecast_list_view_custom_adapter.xml" value="0.33" />
         <entry key="..\:/git/SocWeather/app/src/main/res/layout/fragment_forecast_list_view_string.xml" value="0.33" />
-        <entry key="..\:/git/SocWeather/app/src/main/res/layout/fragment_location_selection.xml" value="0.19739583333333333" />
+        <entry key="..\:/git/SocWeather/app/src/main/res/layout/fragment_location_confirmation.xml" value="0.22239583333333332" />
+        <entry key="..\:/git/SocWeather/app/src/main/res/layout/fragment_location_selection.xml" value="0.5" />
+        <entry key="..\:/git/SocWeather/app/src/main/res/layout/fragment_settings.xml" value="0.22239583333333332" />
         <entry key="..\:/git/SocWeather/app/src/main/res/layout/hour_forecast_list_item.xml" value="0.5" />
       </map>
     </option>

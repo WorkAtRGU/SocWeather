@@ -31,12 +31,30 @@
         <action
             android:id="@+id/action_locationConfirmationFragment_to_forecastFragment"
             app:destination="@id/forecastFragment" />
+        <action
+            android:id="@+id/action_locationConfirmationFragment_to_forecastListViewCustomAdapterFragment"
+            app:destination="@id/forecastListViewCustomAdapterFragment" />
+        <argument
+            android:name="location"
+            app:argType="string"
+            app:nullable="true" />
+        <argument
+            android:name="numOfDays"
+            app:argType="integer"
+            android:defaultValue="3" />
     </fragment>
     <fragment
         android:id="@+id/forecastFragment"
         android:name="uk.ac.rgu.socweather.ForecastFragment"
         android:label="fragment_forecast"
-        tools:layout="@layout/fragment_forecast" />
+        tools:layout="@layout/fragment_forecast" >
+        <argument
+            android:name="location"
+            app:argType="string" />
+        <argument
+            android:name="numOfDays"
+            app:argType="integer" />
+    </fragment>
     <fragment
         android:id="@+id/settingsFragment"
         android:name="uk.ac.rgu.socweather.SettingsFragment"
