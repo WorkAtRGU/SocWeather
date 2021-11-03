@@ -1,5 +1,7 @@
 package uk.ac.rgu.socweather;
 
+import static java.net.Proxy.Type.HTTP;
+
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
@@ -98,6 +100,9 @@ public class ForecastFragment extends Fragment implements View.OnClickListener {
 
         Button btnOpenBrowswer = view.findViewById(R.id.btnCheckForecastOnline);
         btnOpenBrowswer.setOnClickListener(this);
+
+        Button btnShare = view.findViewById(R.id.btnShareForecast);
+        btnShare.setOnClickListener(this);
     }
 
     @Override
@@ -113,12 +118,22 @@ public class ForecastFragment extends Fragment implements View.OnClickListener {
 //            if (intent.resolveActivity(getContext().getPackageManager()) != null) {
                 startActivity(intent);
 //            }
-        } else if (v.getId() == R.id.btnCheckForecastOnline){
+        }
+        else if (v.getId() == R.id.btnCheckForecastOnline){
             Uri webpage = buildUri(
                     "https://www.bing.com/search",
                     "q",
                     mLocationName + " weather");
             Intent intent = new Intent(Intent.ACTION_VIEW, webpage);
+//            if (intent.resolveActivity(getContext().getPackageManager()) != null) {
+                startActivity(intent);
+//            }
+        }
+        else if (v.getId() == R.id.btnShareForecast){
+            Intent intent = new Intent(Intent.ACTION_SENDTO);
+            intent.setType("text/plain");
+            String message = "Forecast for " + mLocationName;
+            intent.putExtra("sms_body", message);
 //            if (intent.resolveActivity(getContext().getPackageManager()) != null) {
                 startActivity(intent);
 //            }
