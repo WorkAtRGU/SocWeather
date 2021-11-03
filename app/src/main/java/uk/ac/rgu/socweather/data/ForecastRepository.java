@@ -110,7 +110,6 @@ public class ForecastRepository {
         // for a random weather type
         RandomWeatherForecastGetter rwf = new RandomWeatherForecastGetter(context);
 
-
         // create number of forecasts with random details, add to forecasts
         for (int i = 0; i < number; i++){
             HourForecast forecast = new HourForecast();

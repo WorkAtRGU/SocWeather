@@ -22,6 +22,7 @@ import java.util.List;
 
 import uk.ac.rgu.socweather.data.ForecastRepository;
 import uk.ac.rgu.socweather.data.HourForecast;
+import uk.ac.rgu.socweather.data.Utils;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -113,14 +114,14 @@ public class ForecastFragment extends Fragment implements View.OnClickListener {
             // create a URI for geo:0,0?q=mLocationName
 
             // update the intent with the data (URI)
-            intent.setData(buildUri("geo:0,0", "q", mLocationName));
+            intent.setData(Utils.buildUri("geo:0,0", "q", mLocationName));
             // launch it
 //            if (intent.resolveActivity(getContext().getPackageManager()) != null) {
                 startActivity(intent);
 //            }
         }
         else if (v.getId() == R.id.btnCheckForecastOnline){
-            Uri webpage = buildUri(
+            Uri webpage = Utils.buildUri(
                     "https://www.bing.com/search",
                     "q",
                     mLocationName + " weather");
@@ -140,22 +141,7 @@ public class ForecastFragment extends Fragment implements View.OnClickListener {
         }
     }
 
-    /**
-     * Builds and returns a Uri based on the parameters
-     * @param base The base of the URI
-     * @param paramName The name of the single parameter that will be added to the URI
-     * @param paramValue The value of that parameter
-     * @return A URI of the form <base>?<paramName>:<paramValue>
-     */
-    @NonNull
-    private Uri buildUri
-    (String base, String paramName, String paramValue) {
-        Uri geoLocation = Uri.parse(base);
-        // create a URI Builder and add the parameter
-        Uri.Builder uriBuilder = geoLocation.buildUpon();
-        uriBuilder.appendQueryParameter(paramName, paramValue);
-        return uriBuilder.build();
-    }
+
 
 
 
