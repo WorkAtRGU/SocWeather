@@ -130,7 +130,7 @@ public class ForecastFragment extends Fragment implements View.OnClickListener {
 //            }
         }
         else if (v.getId() == R.id.btnShareForecast){
-            Intent intent = new Intent(Intent.ACTION_SENDTO);
+            Intent intent = new Intent(Intent.ACTION_SEND);
             intent.setType("text/plain");
             String message = "Forecast for " + mLocationName;
             intent.putExtra("sms_body", message);
