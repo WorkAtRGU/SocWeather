@@ -86,7 +86,7 @@ public class LocationConfirmationFragment extends Fragment implements View.OnCli
         // add the button click listener
         Button btnGetForecast = view.findViewById(R.id.btnGetForecastLocationConfirm);
         btnGetForecast.setOnClickListener(this);
-
+// test comment
         // get the suitable / candidate locations from the web service
         Uri uri = Utils.buildUri("https://api.weatherapi.com/v1/search.json?key=a3b9cc3fb35943d5826152257210311", "q", mLocationName);
         // Request a string response from the provided URL.

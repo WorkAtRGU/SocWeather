@@ -103,8 +103,7 @@ public class ForecastFragment extends Fragment implements View.OnClickListener {
         tvForecastLabel.setText(label);
 
         // get the data to display - a placeholder while waiting to download
-        List<HourForecast> hourForecasts = new ArrayList<HourForecast>();
-                        //ForecastRepository.getRepository(getContext()).getHourlyForecasts(mNumDays*24);
+        List<HourForecast> hourForecasts = ForecastRepository.getRepository(getContext()).getHourlyForecasts(mNumDays*24);
 
         // create the adapter for the RecyclerView
         HourForecastRecyclerViewAdapter adapter = new HourForecastRecyclerViewAdapter(getContext(), hourForecasts);
