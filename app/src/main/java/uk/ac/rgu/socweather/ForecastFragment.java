@@ -42,6 +42,7 @@ import java.util.List;
 import uk.ac.rgu.socweather.data.ForecastRepository;
 import uk.ac.rgu.socweather.data.HourForecast;
 import uk.ac.rgu.socweather.data.Utils;
+import uk.ac.rgu.socweather.data.WeatherApiParser;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -142,55 +143,25 @@ public class ForecastFragment extends Fragment implements View.OnClickListener {
                     public void onResponse(String response) {
                         Log.d(TAG, response);
 
-                        // for processing the date coming from Weather API
-                        SimpleDateFormat dateInParser = new SimpleDateFormat("yyyy-MM-dd");
+                        // parsing code moved to WeatherApiParser class
 
-                        // for processing Dates for display in our app
-                        SimpleDateFormat dateOutFormatter = new SimpleDateFormat(ForecastRepository.DATE_FORMAT);
+                        // clear the data in hourForecasts if there is any
+                        hourForecasts.clear();
 
-                        // process response to get a list of HourForecast objects
-                        // in the JSON, we're interested in forecast>[forecastday]>[hour]
+                        // parse the response with a WeatherApiParser
+                        WeatherApiParser parser = new WeatherApiParser();
+
                         try {
-                            JSONObject rootObject = new JSONObject(response);
-                            JSONObject forecastObj = rootObject.getJSONObject("forecast");
-                            JSONArray forecastDayArray = forecastObj.getJSONArray("forecastday");
-                            hourForecasts.clear();
-                            for (int i = 0, j = forecastDayArray.length(); i < j; i++){
-                                JSONObject forecastDayObject = forecastDayArray.getJSONObject(i);
-                                JSONArray hoursArray = forecastDayObject.getJSONArray("hour");
-                                for (int ii = 0, jj = hoursArray.length(); ii < jj; ii++){
-                                    JSONObject hourObj = hoursArray.getJSONObject(ii);
-
-                                    // time is in the format YYYY-MM-DD HH:mm
-                                    // need to split into day and hour
-                                    String time = hourObj.getString("time");
-                                    int hour = Integer.parseInt(time.substring(11,13));
-                                    Date date = dateInParser.parse(time.substring(0,10));
-                                    String dateStr = dateOutFormatter.format(date);
-
-                                    // get the temp
-                                    int temp = (int)Math.round(hourObj.getDouble("temp_c"));
-
-                                    // get the humidity
-                                    int humidity = hourObj.getInt("humidity");
-
-                                    // get the weather from condition>text
-                                    JSONObject conditionObj = hourObj.getJSONObject("condition");
-                                    String weather = conditionObj.getString("text");
-
-                                    // create an HourForecast with the extracted information
-                                    HourForecast hf = new HourForecast();
-                                    hf.setDate(dateStr);
-                                    hf.setHour(hour);
-                                    hf.setTemperature(temp);
-                                    hf.setHumidity(humidity);
-                                    hf.setWeather(weather);
-                                    hourForecasts.add(hf);
-                                }
-                            }
-                        } catch (JSONException | ParseException e) {
-                            e.printStackTrace();
+                            List<HourForecast> forecasts = parser.convertForecastJson(response);
+                            // add the parsed forecasts to hourForecasts
+                            hourForecasts.addAll(forecasts);
+                        } catch (JSONException | ParseException e){
+                            Log.d(TAG, e.getLocalizedMessage());
+                            // display a mesasge to the user
+                            Toast.makeText(getActivity().getApplicationContext(), getString(R.string.forecast_download_error), Toast.LENGTH_LONG);
                         }
+
+                        // inform the adapter that the data has changed, to update the RecyclerView
                         adapter.notifyDataSetChanged();
                     }
                 }, new Response.ErrorListener() {
