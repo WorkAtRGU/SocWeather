@@ -26,6 +26,9 @@ public interface HourForecastDAO {
     @Delete
     public void delete(List<HourForecast> hourForecast);
 
+    @Query("DELETE FROM HourForecast WHERE location = :location")
+    public void deleteForLocation(String location);
+
     @Query("SELECT * FROM HourForecast WHERE location = :location AND date = :date")
     public List<HourForecast> findByLocationDate(String location, String date);
 }

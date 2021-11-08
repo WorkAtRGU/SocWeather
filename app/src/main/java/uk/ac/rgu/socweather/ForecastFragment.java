@@ -59,6 +59,15 @@ public class ForecastFragment extends Fragment implements View.OnClickListener {
     private String mLocationName;
     private int mNumDays;
 
+    // for database access
+    private HourForecastDAO hourForecastDAO;
+
+    // for the data being display
+    private List<HourForecast> hourForecasts;
+
+    // the adapter for the RecyclerView
+    private HourForecastRecyclerViewAdapter adapter;
+
     public ForecastFragment() {
         // Required empty public constructor
     }
@@ -87,6 +96,14 @@ public class ForecastFragment extends Fragment implements View.OnClickListener {
             mLocationName = getArguments().getString(LocationConfirmationFragment.ARG_LOCATION_NAME);
             mNumDays = getArguments().getInt(LocationConfirmationFragment.ARG_NUM_DAYS);
         }
+        // get the database for storing and loading the forecast
+        WeatherDatabase weatherDatabase = WeatherDatabase.getDatabase(getContext());
+        // get the DAO for HourForecasts
+        hourForecastDAO = weatherDatabase.hourForecastDAO();
+
+        // get the data to display - a placeholder while waiting to download
+        hourForecasts = new ArrayList<>();//ForecastRepository.getRepository(getContext()).getHourlyForecasts(mNumDays*24);
+
     }
 
     @Override
@@ -105,11 +122,8 @@ public class ForecastFragment extends Fragment implements View.OnClickListener {
         String label = getContext().getString(R.string.tvForecastLabel, mLocationName);
         tvForecastLabel.setText(label);
 
-        // get the data to display - a placeholder while waiting to download
-        List<HourForecast> hourForecasts = new ArrayList<>();//ForecastRepository.getRepository(getContext()).getHourlyForecasts(mNumDays*24);
-
         // create the adapter for the RecyclerView
-        HourForecastRecyclerViewAdapter adapter = new HourForecastRecyclerViewAdapter(getContext(), hourForecasts);
+        adapter = new HourForecastRecyclerViewAdapter(getContext(), hourForecasts);
 
         // get the RecyclerView
         RecyclerView rvForecast = view.findViewById(R.id.rv_forecast);
@@ -126,19 +140,8 @@ public class ForecastFragment extends Fragment implements View.OnClickListener {
          * to read and maintain - this below is by no means an example
          * of good coding standards and practices.
          ***************************************************/
-        // now make the HTTP request to get the forecast
-        // build our URI
-        Uri uri = Uri.parse("https://api.weatherapi.com/v1/forecast.json?key=a3b9cc3fb35943d5826152257210311");
-        Uri.Builder uriBuilder = uri.buildUpon();
-        uriBuilder.appendQueryParameter("q", mLocationName);
-        uriBuilder.appendQueryParameter("days", String.valueOf(mNumDays));
-        // create the final URL
-        uri = uriBuilder.build();
 
-        // get the database for storing and loading the forecast
-        WeatherDatabase weatherDatabase = WeatherDatabase.getDatabase(getContext());
-        // get the DAO for HourForecasts
-        HourForecastDAO hourForecastDAO = weatherDatabase.hourForecastDAO();
+
 
         // check for any weather forecasts to retrieve and display
         SimpleDateFormat dateOutFormatter = new SimpleDateFormat(ForecastRepository.DATE_FORMAT);
@@ -151,50 +154,7 @@ public class ForecastFragment extends Fragment implements View.OnClickListener {
             hourForecasts.addAll(cachedForecasts);
             adapter.notifyDataSetChanged();
         } else {
-            // use Volley to make the request
-            StringRequest request = new StringRequest(
-                    Request.Method.GET,
-                    uri.toString(),
-                    new Response.Listener<String>() {
-
-                        @Override
-                        public void onResponse(String response) {
-                            Log.d(TAG, response);
-
-                            // parsing code moved to WeatherApiParser class
-
-                            // clear the data in hourForecasts if there is any
-                            hourForecasts.clear();
-
-                            // parse the response with a WeatherApiParser
-                            WeatherApiParser parser = new WeatherApiParser();
-
-                            try {
-                                List<HourForecast> forecasts = parser.convertForecastJson(response, mLocationName);
-                                // add the parsed forecasts to hourForecasts
-                                hourForecasts.addAll(forecasts);
-                                // store the forecasts in the database
-                                hourForecastDAO.insert(forecasts);
-                                int i = 0;
-                            } catch (JSONException | ParseException e) {
-                                Log.d(TAG, e.getLocalizedMessage());
-                                // display a mesasge to the user
-                                Toast.makeText(getActivity().getApplicationContext(), getString(R.string.forecast_download_error), Toast.LENGTH_LONG);
-                            }
-
-                            // inform the adapter that the data has changed, to update the RecyclerView
-                            adapter.notifyDataSetChanged();
-                        }
-                    }, new Response.ErrorListener() {
-                @Override
-                public void onErrorResponse(VolleyError error) {
-                    Toast.makeText(getActivity().getApplicationContext(), getString(R.string.forecast_download_error), Toast.LENGTH_LONG);
-                    Log.e(TAG, error.getLocalizedMessage());
-                }
-            });
-            // now make the request
-            RequestQueue queue = Volley.newRequestQueue(getContext());
-            queue.add(request);
+            downloadWeatherForecast();
         }
 
         // add action listeners to the three buttons
@@ -206,6 +166,9 @@ public class ForecastFragment extends Fragment implements View.OnClickListener {
 
         Button btnShare = view.findViewById(R.id.btnShareForecast);
         btnShare.setOnClickListener(this);
+
+        Button btnRedownload = view.findViewById(R.id.btnRedownloadWeather);
+        btnRedownload.setOnClickListener(this);
     }
 
     @Override
@@ -240,7 +203,69 @@ public class ForecastFragment extends Fragment implements View.OnClickListener {
 //            if (intent.resolveActivity(getContext().getPackageManager()) != null) {
                 startActivity(intent);
 //            }
+        } else if (v.getId() == R.id.btnRedownloadWeather){
+            // delete any existing data for this location
+            hourForecastDAO.deleteForLocation(mLocationName);
+
+            // redownload it
+            downloadWeatherForecast();
         }
+    }
+
+    private void downloadWeatherForecast(){
+        // now make the HTTP request to get the forecast
+        // build our URI
+        Uri uri = Uri.parse("https://api.weatherapi.com/v1/forecast.json?key=a3b9cc3fb35943d5826152257210311");
+        Uri.Builder uriBuilder = uri.buildUpon();
+        uriBuilder.appendQueryParameter("q", mLocationName);
+        uriBuilder.appendQueryParameter("days", String.valueOf(mNumDays));
+        // create the final URL
+        uri = uriBuilder.build();
+
+        // use Volley to make the request
+        StringRequest request = new StringRequest(
+                Request.Method.GET,
+                uri.toString(),
+                new Response.Listener<String>() {
+
+                    @Override
+                    public void onResponse(String response) {
+                        Log.d(TAG, response);
+
+                        // parsing code moved to WeatherApiParser class
+
+                        // clear the data in hourForecasts if there is any
+                        hourForecasts.clear();
+
+                        // parse the response with a WeatherApiParser
+                        WeatherApiParser parser = new WeatherApiParser();
+
+                        try {
+                            List<HourForecast> forecasts = parser.convertForecastJson(response, mLocationName);
+                            // add the parsed forecasts to hourForecasts
+                            hourForecasts.addAll(forecasts);
+                            // store the forecasts in the database
+                            hourForecastDAO.insert(forecasts);
+                            int i = 0;
+                        } catch (JSONException | ParseException e) {
+                            Log.d(TAG, e.getLocalizedMessage());
+                            // display a mesasge to the user
+                            Toast.makeText(getActivity().getApplicationContext(), getString(R.string.forecast_download_error), Toast.LENGTH_LONG);
+                        }
+
+                        // inform the adapter that the data has changed, to update the RecyclerView
+                        adapter.notifyDataSetChanged();
+                    }
+                }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                Toast.makeText(getActivity().getApplicationContext(), getString(R.string.forecast_download_error), Toast.LENGTH_LONG);
+                Log.e(TAG, error.getLocalizedMessage());
+            }
+        });
+        // now make the request
+        RequestQueue queue = Volley.newRequestQueue(getContext());
+        queue.add(request);
     }
 
 

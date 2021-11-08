@@ -53,5 +53,6 @@
 
     <string name="error_downloading_locations">Error getting locations from the WeatherAPI</string>
     <string name="forecast_download_error">Error getting forecast from WeatherAPI</string>
+    <string name="btnRedownloadWeather">Redownload</string>
 
 </resources>
