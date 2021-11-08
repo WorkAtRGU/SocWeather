@@ -23,6 +23,14 @@ public class HourForecast {
     // the location the forecast is for
     private String location;
 
+    public int getUid() {
+        return uid;
+    }
+
+    public void setUid(int uid) {
+        this.uid = uid;
+    }
+
     @NonNull
     @PrimaryKey(autoGenerate = true)
     private int uid;

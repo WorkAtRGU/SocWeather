@@ -19,11 +19,12 @@ public class WeatherApiParser {
     /**
      *
      * @param jsonString The JSON String returned by the Weather API's forecast web service
+     * @param location The location that the weather forecast is for
      * @return A {@link List} of {@link HourForecast} objects parsed from the jsonString.
      * @throws JSONException if any error occurs with processing the jsonString
      * @throws ParseException if any error occurs with processing the jsonString
      */
-    public List<HourForecast> convertForecastJson(String jsonString) throws JSONException, ParseException{
+    public List<HourForecast> convertForecastJson(String jsonString, String location) throws JSONException, ParseException{
         // for processing the date coming from Weather API
         SimpleDateFormat dateInParser = new SimpleDateFormat("yyyy-MM-dd");
 
@@ -70,6 +71,7 @@ public class WeatherApiParser {
                     hf.setTemperature(temp);
                     hf.setHumidity(humidity);
                     hf.setWeather(weather);
+                    hf.setLocation(location);
                     hourForecasts.add(hf);
                 }
             }

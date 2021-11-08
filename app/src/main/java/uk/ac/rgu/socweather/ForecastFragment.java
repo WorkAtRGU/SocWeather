@@ -41,8 +41,10 @@ import java.util.List;
 
 import uk.ac.rgu.socweather.data.ForecastRepository;
 import uk.ac.rgu.socweather.data.HourForecast;
+import uk.ac.rgu.socweather.data.HourForecastDAO;
 import uk.ac.rgu.socweather.data.Utils;
 import uk.ac.rgu.socweather.data.WeatherApiParser;
+import uk.ac.rgu.socweather.data.WeatherDatabase;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -104,7 +106,7 @@ public class ForecastFragment extends Fragment implements View.OnClickListener {
         tvForecastLabel.setText(label);
 
         // get the data to display - a placeholder while waiting to download
-        List<HourForecast> hourForecasts = ForecastRepository.getRepository(getContext()).getHourlyForecasts(mNumDays*24);
+        List<HourForecast> hourForecasts = new ArrayList<>();//ForecastRepository.getRepository(getContext()).getHourlyForecasts(mNumDays*24);
 
         // create the adapter for the RecyclerView
         HourForecastRecyclerViewAdapter adapter = new HourForecastRecyclerViewAdapter(getContext(), hourForecasts);
@@ -133,47 +135,67 @@ public class ForecastFragment extends Fragment implements View.OnClickListener {
         // create the final URL
         uri = uriBuilder.build();
 
-        // use Volley to make the request
-        StringRequest request = new StringRequest(
-                Request.Method.GET,
-                uri.toString(),
-                new Response.Listener<String>() {
+        // get the database for storing and loading the forecast
+        WeatherDatabase weatherDatabase = WeatherDatabase.getDatabase(getContext());
+        // get the DAO for HourForecasts
+        HourForecastDAO hourForecastDAO = weatherDatabase.hourForecastDAO();
 
-                    @Override
-                    public void onResponse(String response) {
-                        Log.d(TAG, response);
+        // check for any weather forecasts to retrieve and display
+        SimpleDateFormat dateOutFormatter = new SimpleDateFormat(ForecastRepository.DATE_FORMAT);
+        Date date = new Date();
+        date.setTime(System.currentTimeMillis());
+        String dateStr = dateOutFormatter.format(date);
+        List<HourForecast> cachedForecasts = hourForecastDAO.findByLocationDate(mLocationName, dateStr);
+        if (cachedForecasts.size() > 0){
+            hourForecasts.clear();
+            hourForecasts.addAll(cachedForecasts);
+            adapter.notifyDataSetChanged();
+        } else {
+            // use Volley to make the request
+            StringRequest request = new StringRequest(
+                    Request.Method.GET,
+                    uri.toString(),
+                    new Response.Listener<String>() {
 
-                        // parsing code moved to WeatherApiParser class
+                        @Override
+                        public void onResponse(String response) {
+                            Log.d(TAG, response);
 
-                        // clear the data in hourForecasts if there is any
-                        hourForecasts.clear();
+                            // parsing code moved to WeatherApiParser class
 
-                        // parse the response with a WeatherApiParser
-                        WeatherApiParser parser = new WeatherApiParser();
+                            // clear the data in hourForecasts if there is any
+                            hourForecasts.clear();
 
-                        try {
-                            List<HourForecast> forecasts = parser.convertForecastJson(response);
-                            // add the parsed forecasts to hourForecasts
-                            hourForecasts.addAll(forecasts);
-                        } catch (JSONException | ParseException e){
-                            Log.d(TAG, e.getLocalizedMessage());
-                            // display a mesasge to the user
-                            Toast.makeText(getActivity().getApplicationContext(), getString(R.string.forecast_download_error), Toast.LENGTH_LONG);
+                            // parse the response with a WeatherApiParser
+                            WeatherApiParser parser = new WeatherApiParser();
+
+                            try {
+                                List<HourForecast> forecasts = parser.convertForecastJson(response, mLocationName);
+                                // add the parsed forecasts to hourForecasts
+                                hourForecasts.addAll(forecasts);
+                                // store the forecasts in the database
+                                hourForecastDAO.insert(forecasts);
+                                int i = 0;
+                            } catch (JSONException | ParseException e) {
+                                Log.d(TAG, e.getLocalizedMessage());
+                                // display a mesasge to the user
+                                Toast.makeText(getActivity().getApplicationContext(), getString(R.string.forecast_download_error), Toast.LENGTH_LONG);
+                            }
+
+                            // inform the adapter that the data has changed, to update the RecyclerView
+                            adapter.notifyDataSetChanged();
                         }
-
-                        // inform the adapter that the data has changed, to update the RecyclerView
-                        adapter.notifyDataSetChanged();
-                    }
-                }, new Response.ErrorListener() {
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-                        Toast.makeText(getActivity().getApplicationContext(), getString(R.string.forecast_download_error), Toast.LENGTH_LONG);
-                        Log.e(TAG, error.getLocalizedMessage());
-                    }
+                    }, new Response.ErrorListener() {
+                @Override
+                public void onErrorResponse(VolleyError error) {
+                    Toast.makeText(getActivity().getApplicationContext(), getString(R.string.forecast_download_error), Toast.LENGTH_LONG);
+                    Log.e(TAG, error.getLocalizedMessage());
+                }
             });
-        // now make the request
-        RequestQueue queue = Volley.newRequestQueue(getContext());
-        queue.add(request);
+            // now make the request
+            RequestQueue queue = Volley.newRequestQueue(getContext());
+            queue.add(request);
+        }
 
         // add action listeners to the three buttons
         Button btnShowMap = view.findViewById(R.id.btnShowLocationMap);
