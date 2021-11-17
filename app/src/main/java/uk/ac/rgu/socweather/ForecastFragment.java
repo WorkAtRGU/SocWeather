@@ -14,6 +14,8 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.os.Handler;
+import android.os.Looper;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -38,6 +40,8 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 
 import uk.ac.rgu.socweather.data.ForecastRepository;
 import uk.ac.rgu.socweather.data.HourForecast;
@@ -203,12 +207,30 @@ public class ForecastFragment extends Fragment implements View.OnClickListener {
 //            if (intent.resolveActivity(getContext().getPackageManager()) != null) {
                 startActivity(intent);
 //            }
-        } else if (v.getId() == R.id.btnRedownloadWeather){
+        }
+        else if (v.getId() == R.id.btnRedownloadWeather){
             // delete any existing data for this location
-            hourForecastDAO.deleteForLocation(mLocationName);
 
-            // redownload it
-            downloadWeatherForecast();
+            Executor executor = Executors.newSingleThreadExecutor();
+            Handler hander = new Handler(Looper.getMainLooper());
+            executor.execute(new Runnable() {
+                @Override
+                public void run() {
+                    // call the DAO to delete the data for this location
+                    hourForecastDAO.deleteForLocation(mLocationName);
+                    // download the weather forecast on the main / UI thread
+                    hander.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            // redownload it
+                            downloadWeatherForecast();
+                        }
+                    });
+                }
+            });
+
+
+
         }
     }
 
@@ -244,8 +266,17 @@ public class ForecastFragment extends Fragment implements View.OnClickListener {
                             List<HourForecast> forecasts = parser.convertForecastJson(response, mLocationName);
                             // add the parsed forecasts to hourForecasts
                             hourForecasts.addAll(forecasts);
-                            // store the forecasts in the database
-                            hourForecastDAO.insert(forecasts);
+                            // store the forecasts in the database on a background thread
+                            Executor executor = Executors.newSingleThreadExecutor();
+                            executor.execute(new Runnable() {
+                                @Override
+                                public void run() {
+                                    // insert forecasts into the database
+                                    hourForecastDAO.insert(forecasts);
+                                }
+                            });
+
+
                             int i = 0;
                         } catch (JSONException | ParseException e) {
                             Log.d(TAG, e.getLocalizedMessage());
