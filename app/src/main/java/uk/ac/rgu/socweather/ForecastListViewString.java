@@ -76,7 +76,7 @@ public class ForecastListViewString extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         // get the data for the weather forecast
-        List<HourForecast> forecast = ForecastRepository.getRepository(getContext()).getHourlyForecasts(24*3);
+        List<HourForecast> forecast = ForecastRepository.getRepository(getContext()).getRandomHourlyForecasts(24*3);
 
         // create a array of string for each hour forecast
         List<String> forecastStrs = new ArrayList<String>();

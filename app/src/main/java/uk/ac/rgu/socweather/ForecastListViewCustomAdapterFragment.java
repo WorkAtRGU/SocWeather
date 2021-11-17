@@ -74,7 +74,7 @@ public class ForecastListViewCustomAdapterFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         // get the hour forecast
-        List<HourForecast> hourForecasts = ForecastRepository.getRepository(getContext()).getHourlyForecasts(3*24);
+        List<HourForecast> hourForecasts = ForecastRepository.getRepository(getContext()).getRandomHourlyForecasts(3*24);
         // create my custom adapter
         HourForecastListItemViewAdapter adapter = new HourForecastListItemViewAdapter(getContext(), R.layout.hour_forecast_list_item,hourForecasts);
 

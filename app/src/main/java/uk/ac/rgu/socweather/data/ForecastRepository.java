@@ -1,7 +1,11 @@
 package uk.ac.rgu.socweather.data;
 
 import android.content.Context;
+import android.os.Handler;
+import android.os.Looper;
 import android.widget.CalendarView;
+
+import androidx.lifecycle.LiveData;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -9,11 +13,14 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Random;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 
 /**
  * This class provides the single point of truth in the app for {@link LocationForecast}s, and
  * will in the future deal with downloading, storing, and retrieving them.
- * @author  David Corsar
+ *
+ * @author David Corsar
  */
 public class ForecastRepository {
 
@@ -28,22 +35,30 @@ public class ForecastRepository {
      */
     private static ForecastRepository INSTANCE;
 
-    /**
-     * The Context that the app is operating within
-     */
     private Context context;
+
+    private HourForecastDAO hourForecastDAO;
+
+    private LiveData<List<HourForecast>> hourForecasts;
+
+    private ForecastRepository(Context context) {
+        super();
+        this.context = context;
+        hourForecastDAO = WeatherDatabase.getDatabase(context).hourForecastDAO();
+        hourForecasts = null;
+    }
 
     /**
      * Gets the singleton {@link ForecastRepository} for use when managing {@link LocationForecast}s
      * in the app.
+     *
      * @return The {@link ForecastRepository} to be used for managing {@link LocationForecast}s in the app.
      */
-    public static ForecastRepository getRepository(Context context){
-        if (INSTANCE == null){
+    public static ForecastRepository getRepository(Context context) {
+        if (INSTANCE == null) {
             synchronized (ForecastRepository.class) {
                 if (INSTANCE == null)
-                    INSTANCE = new ForecastRepository();
-                    INSTANCE.context = context;
+                    INSTANCE = new ForecastRepository(context);
             }
         }
         return INSTANCE;
@@ -51,27 +66,29 @@ public class ForecastRepository {
 
     /**
      * Returns a {@link LocationForecast} for the given location name, generated at random
+     *
      * @param locationName The name of the location to return the LocationForecast for
      * @return a {@link LocationForecast} for today for the given location, with randomly generated temperature range.
      */
-    public LocationForecast getForecastFor(String locationName){
+    public LocationForecast getForecastFor(String locationName) {
         return getForecastFor(locationName, 0);
     }
 
     /**
      * Returns a {@link LocationForecast} for the given location name, generated at random.
-     * @param locationName The name of the location to return the LocationForecast for.
-     * @param  daysInTheFuture The number of days in the future to return a LocationForecast for.
+     *
+     * @param locationName    The name of the location to return the LocationForecast for.
+     * @param daysInTheFuture The number of days in the future to return a LocationForecast for.
      * @return a {@link LocationForecast} for the specified number of days in the future for the given location, with randomly generated temperature range.
      */
-    public LocationForecast getForecastFor(String locationName, int daysInTheFuture){
+    public LocationForecast getForecastFor(String locationName, int daysInTheFuture) {
         LocationForecast forecast = new LocationForecast();
         forecast.setLocationName(locationName);
 
         // create a random temperature range between 1 and 30
         Random random = new Random();
-        int min = random.nextInt((20 -1) + 1) + 1;
-        int max = (int)(min * 1.5);
+        int min = random.nextInt((20 - 1) + 1) + 1;
+        int max = (int) (min * 1.5);
         forecast.setMinTemp(min);
         forecast.setMaxTemp(max);
 
@@ -90,13 +107,45 @@ public class ForecastRepository {
         return forecast;
     }
 
+    public LiveData<List<HourForecast>> getHourlyForecastsFromDB(String location, String date) {
+        hourForecasts = hourForecastDAO.findByLocationDate(location, date);
+        return hourForecasts;
+    }
+
+    /**
+     * Stores hourForecasts in the {@link WeatherDatabase}
+     * @param hourForecasts {@link List} of {@link HourForecast} instances to be stored
+     */
+    public void storeInDatabase(List<HourForecast> hourForecasts) {
+        Executor executor = Executors.newSingleThreadExecutor();
+        executor.execute(new Runnable() {
+            @Override
+            public void run() {
+                // insert forecasts into the database
+                hourForecastDAO.insert(hourForecasts);
+            }
+        });
+    }
+
+    public void deleteHourForecastsForLocation(String locationName){
+        Executor executor = Executors.newSingleThreadExecutor();
+        executor.execute(new Runnable() {
+            @Override
+            public void run() {
+                // call the DAO to delete the data for this location
+                hourForecastDAO.deleteForLocation(locationName);
+                // download the weather forecast on the main / UI thread
+            }
+        });
+    }
 
     /**
      * Returns a {@link List} of number {@link HourForecast}s, starting from now.
+     *
      * @param number The number of hour forecasts to return - 24 will be 1 day, 48 is 2 days, etc.
      * @return a {@link List} of number {@link HourForecast}s, starting from now.
      */
-    public List<HourForecast> getHourlyForecasts(int number){
+    public List<HourForecast> getRandomHourlyForecasts(int number) {
         // placeholder for the forecasts to be returned
         List<HourForecast> forecasts = new ArrayList<HourForecast>(number);
         // get the current time
@@ -111,10 +160,10 @@ public class ForecastRepository {
         RandomWeatherForecastGetter rwf = new RandomWeatherForecastGetter(context);
 
         // create number of forecasts with random details, add to forecasts
-        for (int i = 0; i < number; i++){
+        for (int i = 0; i < number; i++) {
             HourForecast forecast = new HourForecast();
-            forecast.setTemperature(random.nextInt(29)+1);
-            forecast.setHumidity(random.nextInt(99)+1);
+            forecast.setTemperature(random.nextInt(29) + 1);
+            forecast.setHumidity(random.nextInt(99) + 1);
             forecast.setWeather(rwf.getWeather());
             // would be more efficient to only do the next line once per day
             forecast.setDate(sdf.format(now.getTime()));

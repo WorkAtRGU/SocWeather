@@ -11,6 +11,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.Observer;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -63,8 +64,8 @@ public class ForecastFragment extends Fragment implements View.OnClickListener {
     private String mLocationName;
     private int mNumDays;
 
-    // for database access
-    private HourForecastDAO hourForecastDAO;
+    // for data access via repository
+    private ForecastRepository forecastRepository;
 
     // for the data being display
     private List<HourForecast> hourForecasts;
@@ -81,7 +82,7 @@ public class ForecastFragment extends Fragment implements View.OnClickListener {
      * this fragment using the provided parameters.
      *
      * @param locationName The name of the location to display the forecast for.
-     * @param numDays The number of days to display the forecast for.
+     * @param numDays      The number of days to display the forecast for.
      * @return A new instance of fragment ForecastFragment.
      */
     public static ForecastFragment newInstance(String locationName, int numDays) {
@@ -100,14 +101,10 @@ public class ForecastFragment extends Fragment implements View.OnClickListener {
             mLocationName = getArguments().getString(LocationConfirmationFragment.ARG_LOCATION_NAME);
             mNumDays = getArguments().getInt(LocationConfirmationFragment.ARG_NUM_DAYS);
         }
-        // get the database for storing and loading the forecast
-        WeatherDatabase weatherDatabase = WeatherDatabase.getDatabase(getContext());
-        // get the DAO for HourForecasts
-        hourForecastDAO = weatherDatabase.hourForecastDAO();
+        forecastRepository = ForecastRepository.getRepository(getContext());
 
         // get the data to display - a placeholder while waiting to download
         hourForecasts = new ArrayList<>();//ForecastRepository.getRepository(getContext()).getHourlyForecasts(mNumDays*24);
-
     }
 
     @Override
@@ -146,37 +143,25 @@ public class ForecastFragment extends Fragment implements View.OnClickListener {
          ***************************************************/
 
 
-
         // check for any weather forecasts to retrieve and display from the database
         SimpleDateFormat dateOutFormatter = new SimpleDateFormat(ForecastRepository.DATE_FORMAT);
         Date date = new Date();
         date.setTime(System.currentTimeMillis());
         String dateStr = dateOutFormatter.format(date);
 
-        Executor executor = Executors.newSingleThreadExecutor();
-        Handler handler = new Handler(Looper.getMainLooper());
-        executor.execute(new Runnable() {
+        forecastRepository.getHourlyForecastsFromDB(mLocationName, dateStr).observe(getViewLifecycleOwner(), new Observer<List<HourForecast>>() {
             @Override
-            public void run() {
-                // get any forecasts on the background thread
-                List<HourForecast> cachedForecasts = hourForecastDAO.findByLocationDate(mLocationName, dateStr);
-                handler.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        // use these to update the UI on the UI Thread
-                        if (cachedForecasts.size() > 0){
-                            hourForecasts.clear();
-                            hourForecasts.addAll(cachedForecasts);
-                            adapter.notifyDataSetChanged();
-                        } else {
-                            downloadWeatherForecast();
-                        }
-                    }
-                });
-
+            public void onChanged(List<HourForecast> newHourForecasts) {
+                if (newHourForecasts.size() > 0) {
+                    hourForecasts.clear();
+                    hourForecasts.addAll(newHourForecasts);
+                    adapter.notifyDataSetChanged();
+                } else {
+                    // download it
+                    downloadWeatherForecast();
+                }
             }
         });
-
 
         // add action listeners to the three buttons
         Button btnShowMap = view.findViewById(R.id.btnShowLocationMap);
@@ -194,7 +179,7 @@ public class ForecastFragment extends Fragment implements View.OnClickListener {
 
     @Override
     public void onClick(View v) {
-        if (v.getId() == R.id.btnShowLocationMap){
+        if (v.getId() == R.id.btnShowLocationMap) {
             // launch the map app to show this location.
             Intent intent = new Intent(Intent.ACTION_VIEW);
             // create a URI for geo:0,0?q=mLocationName
@@ -203,55 +188,39 @@ public class ForecastFragment extends Fragment implements View.OnClickListener {
             intent.setData(Utils.buildUri("geo:0,0", "q", mLocationName));
             // launch it
 //            if (intent.resolveActivity(getContext().getPackageManager()) != null) {
-                startActivity(intent);
+            startActivity(intent);
 //            }
         }
-        else if (v.getId() == R.id.btnCheckForecastOnline){
+        else if (v.getId() == R.id.btnCheckForecastOnline) {
             Uri webpage = Utils.buildUri(
                     "https://www.bing.com/search",
                     "q",
                     mLocationName + " weather");
             Intent intent = new Intent(Intent.ACTION_VIEW, webpage);
 //            if (intent.resolveActivity(getContext().getPackageManager()) != null) {
-                startActivity(intent);
+            startActivity(intent);
 //            }
         }
-        else if (v.getId() == R.id.btnShareForecast){
+        else if (v.getId() == R.id.btnShareForecast) {
             Intent intent = new Intent(Intent.ACTION_SEND);
             intent.setType("text/plain");
             String message = "Forecast for " + mLocationName;
             intent.putExtra("sms_body", message);
 //            if (intent.resolveActivity(getContext().getPackageManager()) != null) {
-                startActivity(intent);
+            startActivity(intent);
 //            }
         }
-        else if (v.getId() == R.id.btnRedownloadWeather){
+        else if (v.getId() == R.id.btnRedownloadWeather) {
             // delete any existing data for this location
 
-            Executor executor = Executors.newSingleThreadExecutor();
-            Handler hander = new Handler(Looper.getMainLooper());
-            executor.execute(new Runnable() {
-                @Override
-                public void run() {
-                    // call the DAO to delete the data for this location
-                    hourForecastDAO.deleteForLocation(mLocationName);
-                    // download the weather forecast on the main / UI thread
-                    hander.post(new Runnable() {
-                        @Override
-                        public void run() {
-                            // redownload it
-                            downloadWeatherForecast();
-                        }
-                    });
-                }
-            });
-
-
-
+            forecastRepository.deleteHourForecastsForLocation(mLocationName);
+            // download the weather forecast on the main / UI thread
         }
+
+
     }
 
-    private void downloadWeatherForecast(){
+    private void downloadWeatherForecast() {
         // now make the HTTP request to get the forecast
         // build our URI
         Uri uri = Uri.parse("https://api.weatherapi.com/v1/forecast.json?key=a3b9cc3fb35943d5826152257210311");
@@ -282,16 +251,9 @@ public class ForecastFragment extends Fragment implements View.OnClickListener {
                         try {
                             List<HourForecast> forecasts = parser.convertForecastJson(response, mLocationName);
                             // add the parsed forecasts to hourForecasts
-                            hourForecasts.addAll(forecasts);
+//                            hourForecasts.addAll(forecasts);
                             // store the forecasts in the database on a background thread
-                            Executor executor = Executors.newSingleThreadExecutor();
-                            executor.execute(new Runnable() {
-                                @Override
-                                public void run() {
-                                    // insert forecasts into the database
-                                    hourForecastDAO.insert(forecasts);
-                                }
-                            });
+                            forecastRepository.storeInDatabase(forecasts);
 
 
                             int i = 0;
@@ -302,7 +264,8 @@ public class ForecastFragment extends Fragment implements View.OnClickListener {
                         }
 
                         // inform the adapter that the data has changed, to update the RecyclerView
-                        adapter.notifyDataSetChanged();
+                        // no need to do this as LiveData will alert us
+                        // adapter.notifyDataSetChanged();
                     }
                 }, new Response.ErrorListener() {
             @Override
@@ -315,10 +278,4 @@ public class ForecastFragment extends Fragment implements View.OnClickListener {
         RequestQueue queue = Volley.newRequestQueue(getContext());
         queue.add(request);
     }
-
-
-
-
-
-
 }

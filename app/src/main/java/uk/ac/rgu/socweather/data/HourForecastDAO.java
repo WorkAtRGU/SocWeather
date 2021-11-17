@@ -1,5 +1,6 @@
 package uk.ac.rgu.socweather.data;
 
+import androidx.lifecycle.LiveData;
 import androidx.room.Dao;
 import androidx.room.Delete;
 import androidx.room.Insert;
@@ -30,5 +31,5 @@ public interface HourForecastDAO {
     public void deleteForLocation(String location);
 
     @Query("SELECT * FROM HourForecast WHERE location = :location AND date = :date")
-    public List<HourForecast> findByLocationDate(String location, String date);
+    public LiveData<List<HourForecast>> findByLocationDate(String location, String date);
 }
