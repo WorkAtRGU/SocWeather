@@ -22,7 +22,6 @@ public abstract class WeatherDatabase extends RoomDatabase {
                             WeatherDatabase.class,
                             "weather_database")
                             .fallbackToDestructiveMigration()
-                            .allowMainThreadQueries()
                             .build();
                 }
             }

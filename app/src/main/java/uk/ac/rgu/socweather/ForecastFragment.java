@@ -147,19 +147,36 @@ public class ForecastFragment extends Fragment implements View.OnClickListener {
 
 
 
-        // check for any weather forecasts to retrieve and display
+        // check for any weather forecasts to retrieve and display from the database
         SimpleDateFormat dateOutFormatter = new SimpleDateFormat(ForecastRepository.DATE_FORMAT);
         Date date = new Date();
         date.setTime(System.currentTimeMillis());
         String dateStr = dateOutFormatter.format(date);
-        List<HourForecast> cachedForecasts = hourForecastDAO.findByLocationDate(mLocationName, dateStr);
-        if (cachedForecasts.size() > 0){
-            hourForecasts.clear();
-            hourForecasts.addAll(cachedForecasts);
-            adapter.notifyDataSetChanged();
-        } else {
-            downloadWeatherForecast();
-        }
+
+        Executor executor = Executors.newSingleThreadExecutor();
+        Handler handler = new Handler(Looper.getMainLooper());
+        executor.execute(new Runnable() {
+            @Override
+            public void run() {
+                // get any forecasts on the background thread
+                List<HourForecast> cachedForecasts = hourForecastDAO.findByLocationDate(mLocationName, dateStr);
+                handler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        // use these to update the UI on the UI Thread
+                        if (cachedForecasts.size() > 0){
+                            hourForecasts.clear();
+                            hourForecasts.addAll(cachedForecasts);
+                            adapter.notifyDataSetChanged();
+                        } else {
+                            downloadWeatherForecast();
+                        }
+                    }
+                });
+
+            }
+        });
+
 
         // add action listeners to the three buttons
         Button btnShowMap = view.findViewById(R.id.btnShowLocationMap);
