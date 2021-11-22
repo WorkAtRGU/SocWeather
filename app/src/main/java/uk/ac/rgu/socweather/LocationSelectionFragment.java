@@ -1,11 +1,17 @@
 package uk.ac.rgu.socweather;
 
+import android.Manifest;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.navigation.Navigation;
 
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -20,6 +26,10 @@ import android.widget.EditText;
 public class LocationSelectionFragment extends Fragment implements View.OnClickListener {
 
 
+    private static final String TAG = "LocSelectFrag";
+    private ActivityResultLauncher<String[]> mLocationPermissionRequest;
+    private Boolean mFineLocationGranted = null;
+    private Boolean mCoarseLocationGranted = null;
 
     public LocationSelectionFragment() {
         // Required empty public constructor
@@ -46,7 +56,36 @@ public class LocationSelectionFragment extends Fragment implements View.OnClickL
         if (getArguments() != null) {
 
         }
+        registerForLocationPermissionCheck();
     }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        mLocationPermissionRequest.unregister();
+    }
+
+    private void registerForLocationPermissionCheck(){
+        mLocationPermissionRequest =
+                registerForActivityResult(new ActivityResultContracts
+                        .RequestMultiplePermissions(), result -> {
+
+                    if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
+                        mFineLocationGranted = result.getOrDefault(
+                                Manifest.permission.ACCESS_FINE_LOCATION, false);
+                        mCoarseLocationGranted = result.getOrDefault(
+                                Manifest.permission.ACCESS_COARSE_LOCATION, false);
+                    } else {
+                        mFineLocationGranted = (ContextCompat.checkSelfPermission(
+                                getContext(), Manifest.permission.ACCESS_FINE_LOCATION) ==
+                                PackageManager.PERMISSION_GRANTED);
+                        mCoarseLocationGranted = (ContextCompat.checkSelfPermission(
+                                getContext(), Manifest.permission.ACCESS_COARSE_LOCATION) ==
+                                PackageManager.PERMISSION_GRANTED);
+                    }
+                });
+    }
+
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -82,7 +121,55 @@ public class LocationSelectionFragment extends Fragment implements View.OnClickL
             Navigation.findNavController(v).navigate(
                     R.id.action_locationSelectionFragment_to_locationConfirmationFragment, args);
         } else if (v.getId() == R.id.btnGpsForecast) {
-            Navigation.findNavController(v).navigate(R.id.action_locationSelectionFragment_to_forecastFragment);
+            checkIfLocationPermissionGranted();
+            getWeatherForUsersLocation(numberOfDays);
+
         }
     }
+    /**
+     * Checks to see if the user has grated appropriate persmissions
+     */
+    private void checkIfLocationPermissionGranted() {
+            if (mFineLocationGranted != null && mFineLocationGranted) {
+                // Precise location access granted.
+                Log.d(TAG, "Fine location granted");
+            } else if (mCoarseLocationGranted != null && mCoarseLocationGranted) {
+                // Only approximate location access granted.
+                Log.d(TAG, "Course location granted");
+            } else {
+                // No location access granted.
+                Log.d(TAG, "No location granted");
+                requestLocationPermissions();
+            }
+
+    }
+
+    private void requestLocationPermissions(){
+        mLocationPermissionRequest.launch(new String[] {
+                Manifest.permission.ACCESS_FINE_LOCATION,
+                Manifest.permission.ACCESS_COARSE_LOCATION
+        });
+    }
+
+    /**
+     * Get the user's location and laucnh the forecast fragment
+     * @param numberOfDays
+     */
+    private void getWeatherForUsersLocation(int numberOfDays) {
+    }
+
+    /**
+     * Launch the forecast fragement for the user's location
+     * @param latitude
+     * @param longitude
+     * @param numberOfDays
+     */
+    private void switchToForecastFragment(double latitude, double longitude, int numberOfDays){
+        Bundle args = new Bundle();
+        args.putString("locationName", String.format("%d,%d", latitude,longitude));
+        args.putInt("numberOfDays", numberOfDays);
+        Navigation.findNavController(getView()).navigate(R.id.action_locationSelectionFragment_to_forecastFragment, args);
+    }
+
+
 }

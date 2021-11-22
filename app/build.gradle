@@ -3,12 +3,13 @@ plugins {
 }
 
 android {
-    compileSdk 30
+    compileSdk 31
 
     defaultConfig {
         applicationId "uk.ac.rgu.socweather"
         minSdk 21
-        targetSdk 30
+        targetSdk 31
+        targetSdk 31
         versionCode 1
         versionName "1.0"
 
@@ -46,4 +47,8 @@ dependencies {
     annotationProcessor "androidx.room:room-compiler:$room_version"
     // optional - Test helpers
     testImplementation "androidx.room:room-testing:$room_version"
+
+    // for the locations persmissions
+    implementation "androidx.activity:activity:1.4.0"
+    implementation "androidx.fragment:fragment:1.4.0"
 }
