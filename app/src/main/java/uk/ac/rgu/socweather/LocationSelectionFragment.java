@@ -234,7 +234,7 @@ public class LocationSelectionFragment extends Fragment implements View.OnClickL
                             });
                 }
             } else if (locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)){
-
+                    // similar code to above, but using the network provider
             }
         }
     }
