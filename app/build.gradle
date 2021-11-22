@@ -1,7 +1,7 @@
 plugins {
     id 'com.android.application'
 }
-
+apply plugin: 'com.android.application'
 android {
     compileSdk 31
 
@@ -51,4 +51,6 @@ dependencies {
     // for the locations persmissions
     implementation "androidx.activity:activity:1.4.0"
     implementation "androidx.fragment:fragment:1.4.0"
+    // for location services
+    implementation 'com.google.android.gms:play-services-location:18.0.0'
 }
